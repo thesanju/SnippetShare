@@ -1,83 +1,87 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require("express");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
-function generateRandomId(length) {
-    let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
+const mongoURL = "mongodb://localhost:27017/gists";
+mongoose
+  .connect(mongoURL)
+  .then(() => console.log("MonogoDB connected"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
 
-    return result;
-}
+const gistSchema = new mongoose.Schema({
+    title: { type: String }, 
+    description: { type: String },
+    code: { type: String },
+    language: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  });
+  
 
-let gists = []
+const Gist = mongoose.model("Gist", gistSchema);
 
-app.get('/gists', (req, res) => {
-    res.json(gists);
-})
+// let gists = [];
 
-app.get('/gists/:id', (req, res) => {
-    const gist = gists.find(g => g.id === (req.params.id))
-    if (gist) {
-        res.json(gist);
-    } else {
-        res.status(404).json({message: "Gist not found"})
-    }
+app.get("/gists", (req, res) => {
+  Gist.find()
+    .then((gists) => res.json(gists))
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
-app.post('/gists', (req, res) => {
-    const {title, desciption, code, language} = req.body;
+app.get("/gists/:id", (req, res) => {
+    Gist.findById(req.params.id)
+    .then(gist => {
+        if (gist) {
+            res.json(gist);
+        } else {
+            res.status(404).json({ message: 'Gist not found' });
+        }
+    })
+    .catch(err => res.status(500).json({ error: err.message }));
+});
 
-    const newGist = {
-       id: generateRandomId(10),
-       title,
-       desciption,
-       code,
-       language,
-       createdAt: new Date(),
-    };
-    gists.push(newGist);
-    res.status(201).json(newGist);
-})
+app.post("/gists", (req, res) => {
+  const { title, desciption, code, language } = req.body;
+  const newGist = new Gist({
+    title,
+    desciption,
+    code,
+    language,
+  });
 
-app.put('/gists/:id', (req, res) => {
-    const { title, desciption, code, language } = req.body;
-    const gistIndex = gists.findIndex(g => g.id === req.params.id)
-    if (gistIndex) {
-    const editedGist = {
-        id: req.params.id,
-        title,
-        desciption,
-        code,
-        language,
-        createdAt: new Date(),
-    };
-    gists[gistIndex] = editedGist;
-    res.json(editedGist);
-} else {
-    res.status(404).json({ message: "Gist not found"});
-}
-})
+  newGist
+    .save()
+    .then((gist) => res.status(201).json(gist))
+    .catch((err) => res.status(400).json({ error: err.message }));
+});
 
-app.delete('/gists/:id', (req, res) => {
-    const gistIndex = gists.findIndex(g => g.id === req.params.id);
-    console.log(gistIndex)
+app.put("/gists/:id", (req, res) => {
+    Gist.findByIdAndUpdate(req.params.id, req.body, {new: true})
+    .then(updatedGist => {
+        if (updatedGist) {
+            res.status(201).json(updatedGist);
+        } else {
+            res.status(404).json({ message: 'Gist not found' });
+        }
+    })
+    .catch(err => res.status(500).json({ err: err.message }))
+});
 
-    if (gistIndex) {
-        gists.splice(gistIndex, 1);
-        res.json({ message: `${req.params.id} deleted`})
-    } else {
-        res.status(404).json({ message: "gist not found"})
-    }
-})
+app.delete("/gists/:id", (req, res) => {
+    Gist.findByIdAndDelete(req.params.id)
+    .then(deletedGist => {
+        if (deletedGist) {
+            res.status(204).json({ message: 'Gist deleted' })
+        } else {
+            res.status(404).json({ message: 'Gist not found' });
+        }
+    })
+    .catch(err => res.status(500).json({ error: err.message }))
+});
 
-
-app.listen(3000)
+app.listen(3000);
