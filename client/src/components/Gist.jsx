@@ -70,9 +70,9 @@ const Gist = () => {
 
             <p className="text-gray-600">{data.description}</p>
 
-            <span className="inline-block bg-gray-200 text-sm text-gray-800 px-3 py-1 rounded-md">
+            {/* <span className="inline-block bg-gray-200 text-sm text-gray-800 px-3 py-1 rounded-md">
               {data.language}
-            </span>
+            </span> */}
 
             <div className="relative">
               <div className="absolute top-0 right-0 bg-gray-100 px-2 py-1 text-xs text-gray-600 rounded-bl-md">
