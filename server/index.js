@@ -48,10 +48,10 @@ app.get("/gists/:id", (req, res) => {
 });
 
 app.post("/gists", (req, res) => {
-  const { title, desciption, code, language } = req.body;
+  const { title, description, code, language } = req.body;
   const newGist = new Gist({
     title,
-    desciption,
+    description,
     code,
     language,
   });
