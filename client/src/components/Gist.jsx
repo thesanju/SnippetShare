@@ -87,6 +87,9 @@ const Gist = () => {
           !errorMessage && <p className="text-gray-500">No Gist found. Enter a valid Gist ID.</p>
         )}
       </div>
+      <div>
+        hi
+      </div>
     </div>
   );
 };
