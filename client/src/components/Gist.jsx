@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { Copy } from "lucide-react";
+import backendURL from "../lib/envConfig";
 
 const Gist = () => {
   const { gistId } = useParams();
@@ -22,7 +23,7 @@ const Gist = () => {
 
   const fetchGist = async (gistId) => {
     try {
-      const response = await fetch(`http://localhost:3000/gists/${gistId}`, {
+      const response = await fetch(backendURL+{gistId}, {
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
