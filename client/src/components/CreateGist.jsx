@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
+import backendURL from "../lib/envConfig";
 
 const CreateGist = () => {
   const [description, setDescription] = useState("");
@@ -15,7 +16,7 @@ const CreateGist = () => {
     e.preventDefault();
     try {
       const body = { description, title, code };
-      const response = await fetch("http://localhost:3000/gists", {
+      const response = await fetch(backendURL, { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -24,8 +25,7 @@ const CreateGist = () => {
         throw new Error("Failed to create gist");
       }
       const data = await response.json();
-      console.log(data)
-      console.log(body)
+      console.log(data);
       navigate(`/${data._id}`);
     } catch (err) {
       console.error(err.message);
